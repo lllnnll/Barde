@@ -2,7 +2,7 @@ require('dotenv').config()
 const express = require('express')
 const app = express()
 const port = process.env.PORT || 3000
-const db = require('./db')
+const { sequelize } = require('./models')
 
 // Middleware CORS pour permettre les requêtes depuis le frontend
 app.use((req, res, next) => {
@@ -26,8 +26,8 @@ app.get('/', (req, res) => {
 // Healthcheck DB
 app.get('/health/db', async (req, res) => {
   try {
-    const result = await db.query('SELECT 1 as ok')
-    res.json({ status: 'ok', db: result.rows[0] })
+    await sequelize.authenticate()
+    res.json({ status: 'ok' })
   } catch (err) {
     res.status(500).json({ status: 'error', message: err.message })
   }
@@ -37,6 +37,16 @@ app.get('/health/db', async (req, res) => {
 const usersRouter = require('./users/route')
 app.use('/users', usersRouter)
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
-})
+async function start() {
+  try {
+    await sequelize.sync()
+    app.listen(port, () => {
+      console.log(`Example app listening on port ${port}`)
+    })
+  } catch (err) {
+    console.error('Failed to start server:', err)
+    process.exit(1)
+  }
+}
+
+start()

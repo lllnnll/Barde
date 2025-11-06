@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../db')
+const { User } = require('../models/User')
 
 // GET all users
 router.get('/', async (req, res) => {
     try {
-        const result = await db.query('SELECT * FROM users')
-        res.json(result.rows)
+        const users = await User.findAll()
+        res.json(users)
     } catch (err) {
         res.status(500).json({ status: 'error', message: err.message })
     }
@@ -15,43 +15,47 @@ router.get('/', async (req, res) => {
 // GET user by id
 router.get('/:id', async (req, res) => {
     try {
-        const result = await db.query('SELECT * FROM users WHERE users.id LIKE ' + req.params.id)
-        res.json
+        const user = await User.findByPk(req.params.id)
+        if (!user) return res.status(404).json({ message: 'User not found' })
+        res.json(user)
     } catch (err) {
         res.status(500).json({ status: 'error', message: err.message })
     }
 })
 
 // POST create new user
-router.post('/', (req, res) => {
-    const newUser = {
-        id: Users.length + 1,
-        name: req.body.name,
-        email: req.body.email,
-    };
-    Users.push(newUser);
-    res.status(201).json(newUser);
+router.post('/', async (req, res) => {
+    try {
+        const created = await User.create({ user_username: req.body.user_username, user_email: req.body.user_email })
+        res.status(201).json(created)
+    } catch (err) {
+        res.status(500).json({ status: 'error', message: err.message })
+    }
 })
 
 // PUT update user
-router.put('/:id', (req, res) => {
-    const user = Users.find(user => user.id === parseInt(req.params.id));
-    if (!user) {
-        return res.status(404).json({ message: 'User not found' });
+router.put('/:id', async (req, res) => {
+    try {
+        const user = await User.findByPk(req.params.id)
+        if (!user) return res.status(404).json({ message: 'User not found' })
+        user.user_username = req.body.user_username ?? user.user_username
+        user.user_email = req.body.user_email ?? user.user_email
+        await user.save()
+        res.json(user)
+    } catch (err) {
+        res.status(500).json({ status: 'error', message: err.message })
     }
-    if (req.body.name) user.name = req.body.name;
-    if (req.body.email) user.email = req.body.email;
-    res.json(user);
 })
 
 // DELETE user
-router.delete('/:id', (req, res) => {
-    const userIndex = Users.findIndex(user => user.id === parseInt(req.params.id));
-    if (userIndex === -1) {
-        return res.status(404).json({ message: 'User not found' });
+router.delete('/:id', async (req, res) => {
+    try {
+        const deleted = await User.destroy({ where: { user_id: req.params.id } })
+        if (!deleted) return res.status(404).json({ message: 'User not found' })
+        res.status(204).send()
+    } catch (err) {
+        res.status(500).json({ status: 'error', message: err.message })
     }
-    const deletedUser = Users.splice(userIndex, 1);
-    res.json(deletedUser[0]);
 })
 
 module.exports = router;
