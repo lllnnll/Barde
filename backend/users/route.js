@@ -1,31 +1,25 @@
 const express = require('express');
 const router = express.Router();
-
-let Users = [
-    {
-        id: 1,
-        name: 'John Doe',
-        email: 'john.doe@example.com',
-    },
-    {
-        id: 2,
-        name: 'Alice',
-        email: 'alice@example.com',
-    }
-]
+const db = require('../db')
 
 // GET all users
-router.get('/', (req, res) => {
-    res.json(Users);
+router.get('/', async (req, res) => {
+    try {
+        const result = await db.query('SELECT * FROM users')
+        res.json(result.rows)
+    } catch (err) {
+        res.status(500).json({ status: 'error', message: err.message })
+    }
 })
 
 // GET user by id
-router.get('/:id', (req, res) => {
-    const user = Users.find(user => user.id === parseInt(req.params.id));
-    if (!user) {
-        return res.status(404).json({ message: 'User not found' });
+router.get('/:id', async (req, res) => {
+    try {
+        const result = await db.query('SELECT * FROM users WHERE users.id LIKE ' + req.params.id)
+        res.json
+    } catch (err) {
+        res.status(500).json({ status: 'error', message: err.message })
     }
-    res.json(user);
 })
 
 // POST create new user
