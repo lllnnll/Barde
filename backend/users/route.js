@@ -1,61 +1,95 @@
-const express = require('express');
-const router = express.Router();
-const { User } = require('../models/User')
+const express = require('express')
+const router = express.Router()
+const { prisma } = require('../prismaClient')
 
 // GET all users
-router.get('/', async (req, res) => {
-    try {
-        const users = await User.findAll()
-        res.json(users)
-    } catch (err) {
-        res.status(500).json({ status: 'error', message: err.message })
-    }
+router.get('/', async (_req, res) => {
+  try {
+    const users = await prisma.user.findMany({ orderBy: { user_id: 'asc' } })
+    res.json(users)
+  } catch (err) {
+    res.status(500).json({ status: 'error', message: err.message })
+  }
 })
 
 // GET user by id
 router.get('/:id', async (req, res) => {
-    try {
-        const user = await User.findByPk(req.params.id)
-        if (!user) return res.status(404).json({ message: 'User not found' })
-        res.json(user)
-    } catch (err) {
-        res.status(500).json({ status: 'error', message: err.message })
+  try {
+    const userId = Number.parseInt(req.params.id, 10)
+    if (Number.isNaN(userId)) {
+      return res.status(400).json({ message: 'Invalid id parameter' })
     }
+    const user = await prisma.user.findUnique({ where: { user_id: userId } })
+    if (!user) return res.status(404).json({ message: 'User not found' })
+    res.json(user)
+  } catch (err) {
+    res.status(500).json({ status: 'error', message: err.message })
+  }
 })
 
 // POST create new user
 router.post('/', async (req, res) => {
-    try {
-        const created = await User.create({ user_username: req.body.user_username, user_email: req.body.user_email })
-        res.status(201).json(created)
-    } catch (err) {
-        res.status(500).json({ status: 'error', message: err.message })
+  try {
+    const { user_username, user_email } = req.body
+    if (!user_username || !user_email) {
+      return res.status(400).json({ message: 'Missing user_username or user_email' })
     }
+    const created = await prisma.user.create({
+      data: { user_username, user_email },
+    })
+    res.status(201).json(created)
+  } catch (err) {
+    if (err.code === 'P2002') {
+      return res.status(409).json({ status: 'error', message: 'Email already exists' })
+    }
+    res.status(500).json({ status: 'error', message: err.message })
+  }
 })
 
 // PUT update user
 router.put('/:id', async (req, res) => {
-    try {
-        const user = await User.findByPk(req.params.id)
-        if (!user) return res.status(404).json({ message: 'User not found' })
-        user.user_username = req.body.user_username ?? user.user_username
-        user.user_email = req.body.user_email ?? user.user_email
-        await user.save()
-        res.json(user)
-    } catch (err) {
-        res.status(500).json({ status: 'error', message: err.message })
+  try {
+    const userId = Number.parseInt(req.params.id, 10)
+    if (Number.isNaN(userId)) {
+      return res.status(400).json({ message: 'Invalid id parameter' })
     }
+    const updates = {}
+    if (req.body.user_username !== undefined) updates.user_username = req.body.user_username
+    if (req.body.user_email !== undefined) updates.user_email = req.body.user_email
+
+    const updated = await prisma.user.update({
+      where: { user_id: userId },
+      data: updates,
+    })
+
+    res.json(updated)
+  } catch (err) {
+    if (err.code === 'P2002') {
+      return res.status(409).json({ status: 'error', message: 'Email already exists' })
+    }
+    if (err.code === 'P2025') {
+      return res.status(404).json({ message: 'User not found' })
+    }
+    res.status(500).json({ status: 'error', message: err.message })
+  }
 })
 
 // DELETE user
 router.delete('/:id', async (req, res) => {
-    try {
-        const deleted = await User.destroy({ where: { user_id: req.params.id } })
-        if (!deleted) return res.status(404).json({ message: 'User not found' })
-        res.status(204).send()
-    } catch (err) {
-        res.status(500).json({ status: 'error', message: err.message })
+  try {
+    const userId = Number.parseInt(req.params.id, 10)
+    if (Number.isNaN(userId)) {
+      return res.status(400).json({ message: 'Invalid id parameter' })
     }
+
+    await prisma.user.delete({ where: { user_id: userId } })
+    res.status(204).send()
+  } catch (err) {
+    if (err.code === 'P2025') {
+      return res.status(404).json({ message: 'User not found' })
+    }
+    res.status(500).json({ status: 'error', message: err.message })
+  }
 })
 
-module.exports = router;
+module.exports = router

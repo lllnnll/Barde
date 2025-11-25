@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "framework": null,
+  "outputDirectory": "",
+  "functions": {
+    "api/index.js": {
+      "includeFiles": "backend/**",
+      "maxDuration": 10,
+      "memory": 1024
+    }
+  },
+  "installCommand": "npm install --prefix backend",
+  "buildCommand": "npm run vercel-build --prefix backend",
+  "env": {
+    "NODE_ENV": "production"
+  }
+}
