@@ -2,7 +2,7 @@ import Carousel, { CarouselItem } from '../components/Carousel';
 import Orb from '../components/Orb';
 import Aurora from '../components/Auror';
 import { useRef, useState, useEffect } from 'react';
-//TODO Faire plutot 3 case gauche milieu droite qui silumine chaqu'un sont tour et change les couleurs
+
 export default function Home() {
   const [auroraStops, setAuroraStops] = useState<[HexColor, HexColor, HexColor]>(['#1DB954', '#10E67A', '#0A7B3F'] as [HexColor, HexColor, HexColor]);
   const [baseWidth, setBaseWidth] = useState<number>(480);
