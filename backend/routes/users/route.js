@@ -3,11 +3,31 @@ const router = express.Router()
 const { prisma } = require('../../prismaClient')
 const bcrypt = require('bcrypt');
 
-// GET all users
-router.get('/', async (_req, res) => {
+// GET all users (with pagination)
+router.get('/', async (req, res) => {
   try {
-    const users = await prisma.user.findMany({ orderBy: { user_id: 'asc' } })
-    res.json(users)
+    const page = parseInt(req.query.page) || 1
+    const limit = parseInt(req.query.limit) || 10
+    const skip = (page - 1) * limit
+
+    const [users, total] = await Promise.all([
+      prisma.user.findMany({
+        skip,
+        take: limit,
+        orderBy: { user_id: 'asc' }
+      }),
+      prisma.user.count()
+    ])
+
+    res.json({
+      data: users,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      }
+    })
   } catch (err) {
     res.status(500).json({ status: 'error', message: err.message })
   }

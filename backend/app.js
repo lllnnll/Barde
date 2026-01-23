@@ -36,8 +36,8 @@ app.get('/health/db', async (_req, res) => {
 })
 
 app.use('/api/auth', authRouter)
-app.use('/users', usersRouter)
-app.use('/bardes', bardesRouter)
+app.use('/api/users', usersRouter)
+app.use('/api/bardes', bardesRouter)
 
 // Prepare the connection ahead of the first request (important on serverless)
 const ready = (async () => {

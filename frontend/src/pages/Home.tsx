@@ -13,7 +13,6 @@ export default function Home() {
   const [baseWidth, setBaseWidth] = useState<number>(480);
   const animRef = useRef<number | null>(null);
   const TRANSITION_MS = 500;
-  (() => {})();
 
   // Ajuste dynamiquement la largeur de base selon la taille de l'écran
   useEffect(() => {
@@ -26,86 +25,52 @@ export default function Home() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-    return (
-        <>
-            <div className="fixed inset-0 -z-10 pointer-events-none">
-                <Aurora amplitude={1.0} blend={0.6} colorStops={auroraStops} />
-            </div>
-            <div className="fixed inset-0 flex items-start justify-center pt-4 pointer-events-none z-20">
-              <GlassSurface width="90%" className="max-w-[1200px] pointer-events-auto">
-                <div className="w-full flex items-center justify-between px-4 py-2">
-                  <h1 className="text-lg text-white/90">
-                    Barde
-                  </h1>
-                  <div className="flex items-center gap-4">
-                    {user ? (
-                      <>
-                        <span className="text-white/90 bg-white/10 px-4 py-2 rounded-lg backdrop-blur-sm">
-                          {user.name || user.username}
-                        </span>
-                        <button
-                          onClick={async () => {
-                            await logout();
-                          }}
-                          className="bg-red-500/80 hover:bg-red-500 text-white px-6 py-2 rounded-lg backdrop-blur-sm transition-colors"
-                        >
-                          Déconnexion
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <Link to="/login" className="text-white/90 hover:text-white transition-colors">
-                          Login
-                        </Link>
-                        <Link to="/register" className="text-white/90 hover:text-white transition-colors">
-                          Register
-                        </Link>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </GlassSurface>
-            </div>
-            <div
-              style={{ position: 'fixed', inset: 0 }}
-              className="w-full h-full flex items-center justify-center z-10"
-            >
-                <div className="w-full max-w-[800px] aspect-square flex items-center justify-center px-4 sm:px-0">
-                    <Orb
-                        hoverIntensity={0.2}
-                        rotateOnHover={true}
-                        hue={0}
-                        forceHoverState={false}
-                    >
-                        <Carousel
-                      baseWidth={baseWidth}
-                            autoplay={true}
-                            autoplayDelay={3000}
-                            pauseOnHover={true}
-                            loop={true}
-                            round={true}
-                            onActiveChange={(item) => {
-                              if (animRef.current) cancelAnimationFrame(animRef.current);
-                              const start = performance.now();
-                              const from = auroraStops;
-                              const tick = (now: number) => {
-                                const t = Math.min(1, (now - start) / TRANSITION_MS);
-                                const next = auroraColorProcess(item.title, from, t);
-                                setAuroraStops(next);
-                                if (t < 1) {
-                                  animRef.current = requestAnimationFrame(tick);
-                                } else {
-                                  animRef.current = null;
-                                }
-                              };
-                              animRef.current = requestAnimationFrame(tick);
-                            }}
-                        />
-                    </Orb>
-                </div>
-            </div>
-        </>
-    )
+  return (
+    <>
+      <div className="fixed inset-0 -z-10 pointer-events-none">
+        <Aurora amplitude={1.0} blend={0.6} colorStops={auroraStops} />
+      </div>
+
+      <div
+        style={{ position: 'fixed', inset: 0 }}
+        className="w-full h-full flex items-center justify-center z-10"
+      >
+        <div className="w-full max-w-[800px] aspect-square flex items-center justify-center px-4 sm:px-0">
+          <Orb
+            hoverIntensity={0.2}
+            rotateOnHover={true}
+            hue={0}
+            forceHoverState={false}
+          >
+            <Carousel
+              baseWidth={baseWidth}
+              autoplay={true}
+              autoplayDelay={3000}
+              pauseOnHover={true}
+              loop={true}
+              round={true}
+              onActiveChange={(item) => {
+                if (animRef.current) cancelAnimationFrame(animRef.current);
+                const start = performance.now();
+                const from = auroraStops;
+                const tick = (now: number) => {
+                  const t = Math.min(1, (now - start) / TRANSITION_MS);
+                  const next = auroraColorProcess(item.title, from, t);
+                  setAuroraStops(next);
+                  if (t < 1) {
+                    animRef.current = requestAnimationFrame(tick);
+                  } else {
+                    animRef.current = null;
+                  }
+                };
+                animRef.current = requestAnimationFrame(tick);
+              }}
+            />
+          </Orb>
+        </div>
+      </div>
+    </>
+  )
 }
 
 function auroraColorProcess(
