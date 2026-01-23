@@ -4,14 +4,12 @@ const { prisma } = require('../../prismaClient');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
+const { validateRegister, validateLogin } = require('../../middleware/validation');
+
 // POST /api/auth/register
-router.post('/register', async (req, res) => {
+router.post('/register', validateRegister, async (req, res) => {
   try {
     const { email, password, name } = req.body;
-
-    if (!email || !password || !name) {
-      return res.status(400).json({ message: 'Champs manquants' });
-    }
 
     const existingUser = await prisma.user.findUnique({
       where: { user_email: email }
@@ -51,7 +49,7 @@ router.post('/register', async (req, res) => {
 });
 
 // POST /api/auth/login
-router.post('/login', async (req, res) => {
+router.post('/login', validateLogin, async (req, res) => {
   try {
     const { email, password } = req.body;
 
