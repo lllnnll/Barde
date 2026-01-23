@@ -9,6 +9,16 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const initAuth = async () => {
+      // Check for token in URL (from social login callback)
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlToken = urlParams.get('token');
+
+      if (urlToken) {
+        localStorage.setItem('token', urlToken);
+        // Clean URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+
       if (authService.isAuthenticated()) {
         try {
           const user = await authService.getCurrentUser();

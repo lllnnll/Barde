@@ -13,6 +13,11 @@ model User {
   user_email    String @unique
   user_password String
 
+  spotify_id           String?
+  spotify_access_token String?
+  spotify_refresh_token String?
+  spotify_token_expiry DateTime?
+
   @@map("users")
 }
 

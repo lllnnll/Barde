@@ -6,6 +6,7 @@ const app = express()
 const usersRouter = require('./routes/users/route')
 const bardesRouter = require('./routes/bardes/route')
 const authRouter = require('./routes/auth/route')
+const spotifyRouter = require('./routes/spotify/route')
 
 const allowOrigin = process.env.CORS_ALLOW_ORIGIN || '*'
 
@@ -36,6 +37,7 @@ app.get('/health/db', async (_req, res) => {
 })
 
 app.use('/api/auth', authRouter)
+app.use('/api/spotify', spotifyRouter)
 app.use('/api/users', usersRouter)
 app.use('/api/bardes', bardesRouter)
 
