@@ -3,8 +3,9 @@ const express = require('express')
 const { prisma } = require('./prismaClient')
 
 const app = express()
-const usersRouter = require('./users/route')
-const bardesRouter = require('./bardes/route')
+const usersRouter = require('./routes/users/route')
+const bardesRouter = require('./routes/bardes/route')
+const authRouter = require('./routes/auth/route')
 
 const allowOrigin = process.env.CORS_ALLOW_ORIGIN || '*'
 
@@ -34,6 +35,7 @@ app.get('/health/db', async (_req, res) => {
   }
 })
 
+app.use('/api/auth', authRouter)
 app.use('/users', usersRouter)
 app.use('/bardes', bardesRouter)
 

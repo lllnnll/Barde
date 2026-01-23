@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
-const { prisma } = require('../prismaClient')
+const { prisma } = require('../../prismaClient')
+const bcrypt = require('bcrypt');
 
 // GET all users
 router.get('/', async (_req, res) => {
@@ -30,12 +31,13 @@ router.get('/:id', async (req, res) => {
 // POST create new user
 router.post('/', async (req, res) => {
   try {
-    const { user_username, user_email } = req.body
-    if (!user_username || !user_email) {
-      return res.status(400).json({ message: 'Missing user_username or user_email' })
+    const { user_username, user_email, user_password } = req.body
+    if (!user_username || !user_email || !user_password) {
+      return res.status(400).json({ message: 'Missing user_username, user_email, or user_password' })
     }
+    const hashedPassword = await bcrypt.hash(password, 10);
     const created = await prisma.user.create({
-      data: { user_username, user_email },
+      data: { user_username, user_email, user_password: hashedPassword },
     })
     res.status(201).json(created)
   } catch (err) {

@@ -1,9 +1,14 @@
+import { Link, useNavigate } from 'react-router-dom';
 import Carousel, { CarouselItem } from '../components/Carousel';
 import Orb from '../components/Orb';
 import Aurora from '../components/Auror';
 import { useRef, useState, useEffect } from 'react';
+import GlassSurface from '../components/GlassSurfaceProps';
+import { useAuth } from '../context/AuthContext';
 
 export default function Home() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [auroraStops, setAuroraStops] = useState<[HexColor, HexColor, HexColor]>(['#1DB954', '#10E67A', '#0A7B3F'] as [HexColor, HexColor, HexColor]);
   const [baseWidth, setBaseWidth] = useState<number>(480);
   const animRef = useRef<number | null>(null);
@@ -23,11 +28,44 @@ export default function Home() {
   }, []);
     return (
         <>
-            {/* Background Aurora */}
             <div className="fixed inset-0 -z-10 pointer-events-none">
                 <Aurora amplitude={1.0} blend={0.6} colorStops={auroraStops} />
             </div>
-            <h1 className='text-white '>Play music with your friends between these platforms</h1>
+            <div className="fixed inset-0 flex items-start justify-center pt-4 pointer-events-none z-20">
+              <GlassSurface width="90%" className="max-w-[1200px] pointer-events-auto">
+                <div className="w-full flex items-center justify-between px-4 py-2">
+                  <h1 className="text-lg text-white/90">
+                    Barde
+                  </h1>
+                  <div className="flex items-center gap-4">
+                    {user ? (
+                      <>
+                        <span className="text-white/90 bg-white/10 px-4 py-2 rounded-lg backdrop-blur-sm">
+                          {user.name || user.username}
+                        </span>
+                        <button
+                          onClick={async () => {
+                            await logout();
+                          }}
+                          className="bg-red-500/80 hover:bg-red-500 text-white px-6 py-2 rounded-lg backdrop-blur-sm transition-colors"
+                        >
+                          Déconnexion
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <Link to="/login" className="text-white/90 hover:text-white transition-colors">
+                          Login
+                        </Link>
+                        <Link to="/register" className="text-white/90 hover:text-white transition-colors">
+                          Register
+                        </Link>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </GlassSurface>
+            </div>
             <div
               style={{ position: 'fixed', inset: 0 }}
               className="w-full h-full flex items-center justify-center z-10"
@@ -65,10 +103,6 @@ export default function Home() {
                         />
                     </Orb>
                 </div>
-              {/* Bottom heading under the orb */}
-              <div className="absolute left-0 right-0 flex justify-center bottom-4 md:bottom-6">
-                <h1 className='text-white'>Try it now !</h1>
-              </div>
             </div>
         </>
     )
@@ -153,4 +187,5 @@ export function transitionThreeColors(
     mixColors(startColors[1], endColors[1], t),
     mixColors(startColors[2], endColors[2], t)
   ];
+
 }

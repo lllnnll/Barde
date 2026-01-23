@@ -11,6 +11,7 @@ model User {
   user_id       Int    @id @default(autoincrement())
   user_username String
   user_email    String @unique
+  user_password String
 
   @@map("users")
 }
